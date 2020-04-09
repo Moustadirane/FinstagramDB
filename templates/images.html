@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8">
-    <title></title>
   </head>
   <body>
+    <style type = "text/css">
+    table, th, td{
+      border: 1px solid black;
+    }
+    </style>
 
-  </body>
+    View all images by {{username}}
+
+    <br>
+
+    <table>
+      <th> Post </th>
+
+      {% for line in posts %}
+        <tr>
+          <td> {{line.ts}} </td>
+          <td> {{line}} </td>
+        </tr>
+      {% endfor %}
+
+    <a href="/images"> View Photos</a> <br>
+
+  <a href="/"> Logout</a>
+
 </html>

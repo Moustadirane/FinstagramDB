@@ -2,6 +2,9 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 import hashlib
+import time
+import datetime as dt
+
 SALT = 'randomDatabases'
 
 #Initialize the app from Flask
@@ -120,13 +123,15 @@ def run_sql_one(query, data):
     cursor.close()
     return data
 
-
 #Feature 1
 
 @app.route('/images')
 def show_images():
     username = session['username']
     cursor = conn.cursor()
+
+    currentTime = time.time()
+    ts = dt.datetime.fromtimestamp(currentTime).strftime('%Y-%m-%d %H: %M: %S')#timestamp
 
     #Query to get all images a user has access to
     #Images that they POST
@@ -150,16 +155,37 @@ def show_images():
     query = 'SELECT * FROM user_post UNION (SELECT * FROM following_post) \
     UNION (SELECT * FROM shared_image) ORDER BY postingDate DESC'
 
+
+
     cursor.execute(query)
 
     info = cursor.fetchall()
 
+    query = 'DROP VIEW user_post, following_post, shared_image'
+    cursor.execute(query)
+
+    personsTagged = ' SELECT * FROM Tag NATURAL JOIN Photo NATURAL JOIN Person \
+    WHERE tagStatus = True;'
+
+    react = 'SELECT username, comment, emoji FROM ReactTo'
+
     cursor.close()
 
-    return render_template('images.html', data = info)
+    return render_template('images.html', data = info, username = username )
 
 #Feature 2
-
+#
+#@app.route('/post', methods = ['GET', 'POST'])
+#def post_image():
+#    username = session['username']
+#    cursor = conn.cursor()
+#    photo = request.form['photo']
+#    query = 'INSERT INTO Photo(pID, postingDate,filePath, allFollowers, caption, poster) \
+#    VALUES(%s,%s, %s,%s,%s, %s)'
+#    cursor.execute(query(photo, username))
+#    conn.commit()
+#    cursor.close()
+#    return redirect(url_for('home'))
 #Feature 3
 
 #Feature 4
