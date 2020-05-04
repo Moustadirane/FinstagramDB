@@ -19,10 +19,12 @@
       <th> lastName</th>
       <th> postingDate</th>
 
-      {% for line in posts %}
+      {% for line in data %}
         <tr>
-          <td> {{line.ts}} </td>
-          <td> {{line}} </td>
+          <td> {{line.pID}} </td>
+          <td> {{line.firstName}} </td>
+          <td> {{line.lastName}} </td>
+          <td> {{line.postingDate}} </td>
         </tr>
       {% endfor %}
     </table> <br>

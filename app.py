@@ -171,37 +171,45 @@ def show_images():
 
     cursor.close()
 
+
     return render_template('images.html', data = info, username = username )
 
 #Feature 3
 @app.route('/makepost')
 def makepost():
-    return render_template('post.html')
+    username = session['username']
+    return render_template('post.html', username = username)
 
 @app.route('/post', methods = ['GET', 'POST'])
 def post_image():
     #variable names for photo table and cursor
-    username = session['username']
-    cursor = conn.cursor()
+    if (request.form):
+        username = session['username']
+        cursor = conn.cursor()
 
-    postingDate = dt.datetime.now()
-    postingDate.strftime( "%Y-%m-%d %H: %M: %S")
-    filePath = request.form['path']
-    allFollowers = request.form['allFollowerStatus']
-    caption = request.form['caption']
+        postingDate = dt.datetime.now()
+        postingDate.strftime( "%Y-%m-%d %H: %M: %S")
+        allFollowers = request.form['allFollowerStatus']
+        filePath = request.form['path']
+        caption = request.form['caption']
 
-    query = "SELECT MAX(pID) FROM Photo"
-    cursor.execute(query)
+        query = "SELECT MAX(pID) FROM Photo"
+        cursor.execute(query)
 
-    pID = int(cursor.fetchone()['MAX(pID)']) + 1
+        pID = int(cursor.fetchone()['MAX(pID)']) + 1
 
-    #photo = request.form['photo']
-    query = 'INSERT INTO Photo(pID, postingDate,filePath, allFollowers, caption, poster) \
-    VALUES(%s,%s, %s,%s,%s, %s)'
-    cursor.execute(query, (pID, postingDate, filePath, allFollowers, caption, username))
-    conn.commit()
-    cursor.close()
-    return redirect('/home')
+        #photo = request.form['photo']
+        query = 'INSERT INTO Photo(pID, postingDate,filePath, allFollowers, caption, poster) \
+        VALUES(%s,%s, %s,%s,%s, %s)'
+        cursor.execute(query, (pID, postingDate, filePath, allFollowers, caption, username))
+        conn.commit()
+        cursor.close()
+
+        return redirect('/home')
+
+    else:
+        error = "Can't create a group"
+        return render_template("home.html", error = error)
 
 #Feature 4
 #Pending Requests from people to you
