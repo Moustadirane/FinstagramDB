@@ -13,7 +13,14 @@
         <p class = "error"> <strong>Error:</strong> {{error}}</p>
       {% endif %}
     </form>
-  <a href="/"> Go back</a>
+
+    <button onclick= "goBack()"> Go Back </button>
+    <script>
+    function goBack(){
+      window.history.back();
+    }
+    </script> <br>
+    <br>
   </body>
 
 </html>

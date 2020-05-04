@@ -9,7 +9,7 @@
       <input type= "radio" name= "requests" value={{line.follower}}>{{line.follower}}</input> <br>
 
       {% endfor %}
-      
+
       <input type= "submit" formaction="/acceptRequests" value= " Accept "> </button>
       <input type= "submit" formaction="/rejectRequests" value= " Reject "> </button>
 
@@ -18,7 +18,16 @@
         <p class = "error"> <strong>Error:</strong> {{error}}</p>
       {% endif %}
     </form>
-  <a href="/"> Go back</a>
+
+    <button onclick= "goBack()"> Go Back </button>
+    <script>
+    function goBack(){
+      window.history.back();
+    }
+    </script> <br>
+    <br>
+
+
   </body>
 
 </html>
