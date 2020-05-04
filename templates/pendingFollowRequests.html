@@ -6,6 +6,7 @@
     <h1> People want to follow you !! </h1>
     <form>
       {% for line in requests%}
+
       <input type= "radio" name= "requests" value={{line.follower}}>{{line.follower}}</input> <br>
 
       {% endfor %}

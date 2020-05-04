@@ -158,11 +158,14 @@ def show_images():
 
 
     cursor.execute(query)
+    conn.commit()
+
 
     info = cursor.fetchall()
 
     query = 'DROP VIEW user_post, following_post, shared_image'
     cursor.execute(query)
+    conn.commit()
 
     personsTagged = ' SELECT * FROM Tag NATURAL JOIN Photo NATURAL JOIN Person \
     WHERE tagStatus = True;'
@@ -227,11 +230,11 @@ def pendingRequests():
     cursor.close()
 
     if (data):
-        return render_template('pendingFollowRequests.html')
+        return render_template('pendingFollowRequests.html', requests = data)
     else:
         error = " There are no follow requests "
         #goes back to home
-        return render_template("home.html", error = error)
+        return render_template("home.html", error = error, username = username)
 
 @app.route('/acceptRequests')
 def acceptFollowRequests():
