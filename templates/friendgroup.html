@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  </head>
+  <body>
+    <h1> Create Friend Groups Here </h1>
+    <form action = "/groupMaker" method = "POST">
+      <input type= "text" name = "groupName" placeholder = "groupName" required/> <br>
+      <input type= "text" name = "description" placeholder = "description" required/> <br>
+      <input type= "submit" value= Create > <br>
+
+      {% if error %}
+        <p class = "error"> <strong>Error:</strong> {{error}}</p>
+      {% endif %}
+
+    </form>
+  </body>
+
+  <button onclick= "goBack()"> Go Back </button>
+  <script>
+  function goBack(){
+    window.history.back();
+  }
+  </script> <br>
+  <br>
+
+
+  <a href="/"> Logout</a>
+
+</html>

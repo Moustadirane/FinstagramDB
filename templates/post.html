@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<!--
+
 <html>
   <head>
   </head>
   <body>
-    <form action = "post" method = "POST">
-      <input type= "text" name = "photo" placeholder = "Photos: " required/> <br>
+    <h1> Hello {{username}}. Load Images to Post Here </h1>
+    <form action = "/post" method = "POST">
+      <input type= "text" name = "path" placeholder = "Input Filepath " required/> <br>
+      <input type= "text" name = "allFollowerStatus" placeholder = "0 = private; 1 = allFollowers" required/> <br>
+      <input type= "text" name = "caption" placeholder = "Input Caption " required/> <br>
+      <input type= "submit" value= Post > <br>
+
       {% if error %}
         <p class = "error"> <strong>Error:</strong> {{error}}</p>
       {% endif %}
+
     </form>
+
   <a href="/"> Go back</a>
   </body>
 
 </html>
--->

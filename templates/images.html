@@ -9,12 +9,15 @@
     }
     </style>
 
-    View all images by {{username}}
+    Here are all images posted by {{username}}:
 
-    <br>
+    <br> <br>
 
     <table>
-      <th> Post </th>
+      <th> pID </th>
+      <th> firstName</th>
+      <th> lastName</th>
+      <th> postingDate</th>
 
       {% for line in posts %}
         <tr>
@@ -22,9 +25,18 @@
           <td> {{line}} </td>
         </tr>
       {% endfor %}
+    </table> <br>
 
-    <a href="/images"> View Photos</a> <br>
+    <button onclick= "goBack()"> Go Back </button>
+    <script>
+    function goBack(){
+      window.history.back();
+    }
+    </script> <br>
+    <br>
+
 
   <a href="/"> Logout</a>
+</body>
 
 </html>
