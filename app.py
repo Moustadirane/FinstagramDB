@@ -206,11 +206,11 @@ def post_image():
 #Feature 4
 #Pending Requests from people to you
 
-@app.route('/pending_followrequests')
+@app.route('/pendingFollowRequests')
 def pendingRequests():
     username = session['username']
 
-    cursor = conn.cursor
+    cursor = conn.cursor()
     query = "SELECT follower FROM follow WHERE followee = %s AND followStatus = 0"
 
     cursor.execute(query, (username))
