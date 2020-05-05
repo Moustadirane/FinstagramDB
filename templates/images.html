@@ -14,19 +14,48 @@
     <br> <br>
 
     <table>
+      <th> images </th>
       <th> pID </th>
       <th> firstName</th>
       <th> lastName</th>
       <th> postingDate</th>
+      <th> tags</th>
+      <th> reacts</th>
 
       {% for line in data %}
         <tr>
+          <td><img style="height: 100px; wdth: 100px" src="data:image/jpeg;base64,{{line.filePath}}" alt="Photo Unavailable"/></td>
           <td> {{line.pID}} </td>
           <td> {{line.firstName}} </td>
           <td> {{line.lastName}} </td>
           <td> {{line.postingDate}} </td>
-        </tr>
+
       {% endfor %}
+      <td>
+      {%for line in newdata%}
+      {{line.username}} {{line.firstName}} {{line.lastName}} <br>
+      {% endfor %}
+      </td>
+
+      <td>
+      {% for line in newerdata %}
+      {%if line.emoji and line.comment%}
+      {{line.username}} {{line.emoji}} {{line.comment}} <br>
+
+      {%elif line.emoji%}
+      {{line.username}} {{line.emoji}}
+
+      {%elif line.comment%}
+      {{line.username}} {{line.comment}}
+
+      {%endif%}
+
+
+      {% endfor %}
+      </td>
+
+      </tr>
+
     </table> <br>
 
     <button onclick= "goBack()"> Go Back </button>

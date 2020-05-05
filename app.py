@@ -4,6 +4,7 @@ import pymysql.cursors
 import hashlib
 import time
 import datetime as dt
+import base64
 
 SALT = 'randomDatabases'
 
@@ -64,9 +65,29 @@ def loginAuth():
     data = cursor.fetchone()
 
     ###use fetchall() if you are expecting more than 1 data row
-    cursor.close()
     error = None
     if(data):
+        #create views
+        user_post = 'CREATE VIEW user_post as (SELECT DISTINCT pID, \
+        postingDate,filePath, allFollowers, caption, poster FROM Photo WHERE poster = %s) '
+        cursor.execute(user_post, (username))
+        conn.commit()
+
+        #Images that the people they are following POST
+        following_post = 'CREATE VIEW following_post as (SELECT DISTINCT pID, \
+        postingDate,filePath, allFollowers, caption, poster FROM Photo JOIN Follow\
+        ON (poster = followee) WHERE follower = %s AND followStatus = TRUE)'
+        cursor.execute(following_post,  (username))
+        conn.commit()
+
+        #Images that have been shared with them in a friend group
+        shared_image = 'CREATE VIEW shared_image as (SELECT DISTINCT pID, \
+        postingDate,filePath, allFollowers, caption, poster FROM Photo NATURAL JOIN SharedWith\
+        WHERE (%s, groupName) IN (SELECT username, groupName FROM BelongTo) )'
+        cursor.execute(shared_image, (username))
+        conn.commit()
+        cursor.close()
+
         #creates a session for the the user
         #session is a built in
         ##session['username'] = username
@@ -113,6 +134,13 @@ def registerAuth():
 
 @app.route('/logout')
 def logout():
+    cursor = conn.cursor()
+
+    query = 'DROP VIEW Finstagram.user_post, Finstagram.following_post, Finstagram.shared_image'
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+
     session.pop('username')
     return redirect('/')
 
@@ -136,46 +164,50 @@ def show_images():
     #Query to get all images a user has access to
     #Images that they POST
 
-    user_post = 'CREATE VIEW user_post as (SELECT DISTINCT pID, \
-    postingDate,filePath, allFollowers, caption, poster FROM Photo WHERE poster = %s) '
-    cursor.execute(user_post, (username))
-
-    #Images that the people they are following POST
-    following_post = 'CREATE VIEW following_post as (SELECT DISTINCT pID, \
-    postingDate,filePath, allFollowers, caption, poster FROM Photo JOIN Follow\
-    ON (poster = followee) WHERE follower = %s AND followStatus = TRUE)'
-    cursor.execute(following_post,  (username))
-
-    #Images that have been shared with them in a friend group
-    shared_image = 'CREATE VIEW shared_image as (SELECT DISTINCT pID, \
-    postingDate,filePath, allFollowers, caption, poster FROM Photo NATURAL JOIN SharedWith\
-    WHERE (%s, groupName) IN (SELECT username, groupName FROM BelongTo) )'
-    cursor.execute(shared_image, (username))
-
     query = 'SELECT * FROM user_post UNION (SELECT * FROM following_post) \
     UNION (SELECT * FROM shared_image) ORDER BY postingDate DESC'
 
 
-
     cursor.execute(query)
     conn.commit()
 
-
+    #loop over query to get first and last name and append (update) to original data
     info = cursor.fetchall()
 
-    query = 'DROP VIEW user_post, following_post, shared_image'
-    cursor.execute(query)
-    conn.commit()
+    #display the photos
+    for photo in info:
+        image = str(base64.b64encode(photo['filePath']).decode('utf-8'))
+        photo['filePath'] = image
 
-    personsTagged = ' SELECT * FROM Tag NATURAL JOIN Photo NATURAL JOIN Person \
-    WHERE tagStatus = True;'
+    for item in info:
+        personID = item["pID"]
+        myquery = 'SELECT firstName, lastName FROM Photo JOIN Person ON (Photo.poster = Person.username) WHERE pID = %s'
 
-    react = 'SELECT username, comment, emoji FROM ReactTo'
+        cursor.execute(myquery, personID)
+        data = cursor.fetchall()
+
+        for newitem in data:
+            item.update(newitem)
+
+    #handle tags
+    for item2 in info:
+        personID = item2["pID"]
+        personsTagged = ' SELECT username, firstName, lastName FROM Tag NATURAL JOIN Person WHERE tagStatus = 1 AND pID = %s'
+
+        cursor.execute(personsTagged, personID)
+        newdata = cursor.fetchall()
+
+    #handle reacts
+    for item3 in info:
+        personID = item3["pID"]
+        reacts = 'SELECT username, comment, emoji FROM ReactTo WHERE pID = %s'
+        cursor.execute(reacts, personID)
+        newerdata = cursor.fetchall()
 
     cursor.close()
 
 
-    return render_template('images.html', data = info, username = username )
+    return render_template('images.html', data = info, username = username, newdata = newdata, newerdata = newerdata )
 
 #Feature 3
 @app.route('/makepost')
@@ -196,6 +228,9 @@ def post_image():
         filePath = request.form['path']
         caption = request.form['caption']
 
+        blobdata = convertBinary(filePath)
+
+
         query = "SELECT MAX(pID) FROM Photo"
         cursor.execute(query)
 
@@ -204,7 +239,7 @@ def post_image():
         #photo = request.form['photo']
         query = 'INSERT INTO Photo(pID, postingDate,filePath, allFollowers, caption, poster) \
         VALUES(%s,%s, %s,%s,%s, %s)'
-        cursor.execute(query, (pID, postingDate, filePath, allFollowers, caption, username))
+        cursor.execute(query, (pID, postingDate, blobdata, allFollowers, caption, username))
         conn.commit()
         cursor.close()
 
@@ -213,6 +248,13 @@ def post_image():
     else:
         error = "Can't create a group"
         return render_template("home.html", error = error)
+
+#opens image, reads binary
+def convertBinary(filePath):
+    with open(filePath, "rb") as file:
+        binarydata = file.read()
+
+    return binarydata
 
 #Feature 4
 #Pending Requests from people to you
