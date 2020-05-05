@@ -136,7 +136,7 @@ def registerAuth():
 def logout():
     cursor = conn.cursor()
 
-    query = 'DROP VIEW Finstagram.user_post, Finstagram.following_post, Finstagram.shared_image'
+    query = 'DROP VIEW following_post, shared_image, user_post'
     cursor.execute(query)
     conn.commit()
     cursor.close()
